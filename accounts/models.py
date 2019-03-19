@@ -7,18 +7,18 @@ from django.contrib.auth.models import(
 
 class UserManager(BaseUserManager):
 
-    def create_user(self, fullname, phone, password=None, is_active=True, is_staff=False, is_admin=False):
+    def create_user(self, fullname,  phone, password=None, is_active=True, is_staff=False, is_admin=False):
         if not phone:
             raise ValueError("User Must have valid phone no")
         if not fullname:
             raise ValueError("Enter full name")
         if not password:
-            raise ValueError("User must have a job")
+            raise ValueError("Enter Valid password")
 
         user_obj = self.model(
             phone =self.normalize_email(phone),
             fullname = fullname,
-            #job_post=job_post
+
         )
         user_obj.set_password(password)
         user_obj.active=is_active
@@ -27,12 +27,11 @@ class UserManager(BaseUserManager):
         user_obj.save(using = self._db)
         return user_obj
 
-    def create_staffuser(self, fullname, phone, password):
+    def create_staffuser(self, fullname,  phone, password=None):
         #password = 'job_post'
         user =self.create_user(
                 phone,
                 fullname,
-            #    job_post,
                 password=password,
                 is_staff=True
         )
@@ -41,16 +40,20 @@ class UserManager(BaseUserManager):
         return user
 
 
-    def create_superuser(self, fullname,  phone, password):
+    def create_superuser(self, fullname, phone, password=None):
         #password = 'job_post'
         user =self.create_user(
                 phone,
                 fullname,
-            #    job_post,
                 password=password,
-                is_admin=True
+                is_admin=True,
+                is_staff=True
         )
+
         user.staff = True
+
+
+
         user.admin = True
         user.save(using=self._db)
         return user
@@ -63,8 +66,8 @@ class User(AbstractBaseUser):
         ('c', 'c'),
     )
     fullname  = models.CharField(max_length=200, default='')
-    job_post  = models.CharField(max_length= 30, choices = job_post)
-    phone = models.CharField(max_length=10, unique=True)
+    job_post  = models.CharField(max_length= 1,choices=job_post)
+    phone = models.CharField(max_length=10, unique=True,default='')
     active = models.BooleanField(default=True)
     admin = models.BooleanField(default=False)
     staff = models.BooleanField(default=False)
@@ -72,9 +75,9 @@ class User(AbstractBaseUser):
 
     ##Custom user name and password
     USERNAME_FIELD = 'phone'
-    PASSWORD_FIELD = 'job_post'
+    #PASSWORD_FIELD = ''
     #username and password are required field bydefaults
-    REQUIRED_FIELDS= ['fullname',]
+    REQUIRED_FIELDS= ['fullname']
 
     objects =UserManager()
 
@@ -104,14 +107,14 @@ class Profile(models.Model):
 
 
 class GuestEmail(models.Model):
-    job_post = (
-        ('a', 'a'),
-        ('b', 'b'),
-        ('c', 'c'),
-    )
+    #job_post = (
+     #   ('a', 'a'),
+      #  ('b', 'b'),
+       # ('c', 'c'),
+    #)
     name  = models.CharField(max_length=200, default='')
     fullname=models.CharField(max_length=200,default='')
-    job_post  = models.CharField(max_length= 30, choices = job_post)
+    job_post  = models.CharField(max_length= 30, default='')
     phone = models.CharField(max_length=10 , default='')
     opid    = models.CharField(max_length=20, default='')
 
